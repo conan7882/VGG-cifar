@@ -12,42 +12,33 @@ from tensorcv.models.base import BaseModel
 import VGG
 import config
 
+def resize_image_with_smallest_224(image):
+    shape = tf.shape(image)
+    height = tf.cast(shape[0], tf.float32)
+    width = tf.cast(shape[1], tf.float32)
+    height_smaller_than_width = tf.less_equal(height, width)
 
-VGG_MEAN = [103.939, 116.779, 123.68]
+    new_shorter_edge = tf.constant(224.0, tf.float32)
+    new_height, new_width = tf.cond(
+    height_smaller_than_width,
+    lambda: (new_shorter_edge, (width / height) * new_shorter_edge),
+    lambda: ((height / width) * new_shorter_edge, new_shorter_edge))
 
-# def get_predictConfig(FLAGS):
-#     mat_name_list = ['level1Edge']
-#     dataset_test = MatlabData('Level_1', shuffle = False,
-#                                mat_name_list = mat_name_list,
-#                                data_dir = FLAGS.test_data_dir)
-#     prediction_list = PredictionImage(['prediction/label', 'prediction/probability'], 
-#                                       ['test','test_pro'], 
-#                                       merge_im = True)
-
-#     return PridectConfig(
-#                 dataflow = dataset_test,
-#                 model = Model(FLAGS.input_channel, 
-#                                 num_class = FLAGS.num_class),
-#                 model_name = 'model-14070',
-#                 model_dir = FLAGS.model_dir,    
-#                 result_dir = FLAGS.result_dir,
-#                 predictions = prediction_list,
-#                 batch_size = FLAGS.batch_size)
+    return tf.image.resize_images(tf.cast(image, tf.float32), 
+                                [tf.cast(new_height, tf.int32), 
+                                tf.cast(new_width, tf.int32)])
 
 if __name__ == '__main__':
-    VGG19 = VGG.VGG19_FCN(num_class = 1000, 
-                num_channels = 3, 
-                im_height = 224, 
-                im_width = 224)
 
-    keep_prob = tf.placeholder(tf.float32, name='keep_prob')
+    keep_prob = 1.0
     image = tf.placeholder(tf.float32, name = 'image',
                             shape = [None, None, None, 3])
-    input_im = image
 
-    # input_im = tf.image.resize_images(tf.cast(image, tf.float32), [224, 224])
+    input_im = resize_image_with_smallest_224(image)
 
-    VGG19.create_model([input_im, keep_prob])
+    # Create model
+    VGG19 = VGG.VGG19_FCN(num_class = 1000)
+    VGG19.create_model([image, keep_prob])
     predict_op = tf.argmax(VGG19.output, dimension = -1)
 
     # dataset_val = ImageLabelFromFile('.JPEG', data_dir = config.valid_data_dir, 
@@ -70,15 +61,15 @@ if __name__ == '__main__':
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         VGG19.load_pre_trained(sess, config.model_dir + 'vgg19.npy')
-        batch_data = dataset_val.next_batch()
-        result = sess.run(predict_op, feed_dict = {keep_prob: 1, image: batch_data[0]})
-        print(result.shape)
-        print(result)
 
-        batch_data = dataset_val.next_batch()
-        result = sess.run(predict_op, feed_dict = {keep_prob: 1, image: batch_data[0]})
-        print(result.shape)
-        print(result)
+        for k in range(0, 10):
+            batch_data = dataset_val.next_batch()
+            result = sess.run(predict_op, feed_dict = {image: batch_data[0]})
+            print(result.shape)
+            print(result)
+        end
+
+
         # print([word_dict[o_label_dict[label]] for label in batch_data[1]])
 
     
