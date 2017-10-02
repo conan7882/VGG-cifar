@@ -13,40 +13,41 @@ import VGG
 import config
 
 def resize_image_with_smallest_224(image):
-    shape = tf.shape(image)
-    height = tf.cast(shape[0], tf.float32)
-    width = tf.cast(shape[1], tf.float32)
+    im_shape = tf.shape(image)
+    shape_dim = image.get_shape()
+    if len(shape_dim) <= 3:
+        height = tf.cast(im_shape[0], tf.float32)
+        width = tf.cast(im_shape[1], tf.float32)
+    else:
+        height = tf.cast(im_shape[1], tf.float32)
+        width = tf.cast(im_shape[2], tf.float32)
+
     height_smaller_than_width = tf.less_equal(height, width)
 
     new_shorter_edge = tf.constant(224.0, tf.float32)
     new_height, new_width = tf.cond(
     height_smaller_than_width,
-    lambda: (new_shorter_edge, (width / height) * new_shorter_edge),
-    lambda: ((height / width) * new_shorter_edge, new_shorter_edge))
+    lambda: (new_shorter_edge, (width/height)*new_shorter_edge),
+    lambda: ((height/width)*new_shorter_edge, new_shorter_edge))
+
 
     return tf.image.resize_images(tf.cast(image, tf.float32), 
-                                [tf.cast(new_height, tf.int32), 
-                                tf.cast(new_width, tf.int32)])
+        [tf.cast(new_height, tf.int32), tf.cast(new_width, tf.int32)])
 
 if __name__ == '__main__':
 
     keep_prob = 1.0
     image = tf.placeholder(tf.float32, name = 'image',
                             shape = [None, None, None, 3])
-
     input_im = resize_image_with_smallest_224(image)
+
 
     # Create model
     VGG19 = VGG.VGG19_FCN(num_class = 1000)
-    VGG19.create_model([image, keep_prob])
+    VGG19.create_model([input_im, keep_prob])
     # predict_op = tf.argmax(VGG19.avg_output, dimension = -1)
     predict_op = tf.nn.top_k(tf.nn.softmax(VGG19.avg_output), k = 5, sorted = True)
 
-    # dataset_val = ImageLabelFromFile('.JPEG', data_dir = config.valid_data_dir, 
-    #                                 label_file_name = 'val_annotations.txt',
-    #                                 num_channel = 3, 
-    #                                 label_dict = {},
-    #                                 shuffle = False)
     dataset_val = ImageFromFile('.JPEG', 
                                 num_channel = 3,
                                 data_dir = config.valid_data_dir, 
