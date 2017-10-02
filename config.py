@@ -8,7 +8,7 @@ train_data_dir = 'D:\\Qian\\GitHub\\workspace\\dataset\\tiny-imagenet-200\\tiny-
 
 # directory of validataion data
 # valid_data_dir = 'D:\\Qian\\GitHub\\workspace\\dataset\\tiny-imagenet-200\\tiny-imagenet-200\\val\\'
-valid_data_dir = 'D:\\Qian\\GitHub\\workspace\\dataset\\ImageNet\\ILSVRC2017_DET_test_new\\ILSVRC\\Data\\DET\\test\\'
+valid_data_dir = 'D:\\Qian\\GitHub\\workspace\\dataset\\ImageNet\\ILSVRC2017_DET_test_new\\ILSVRC\\Data\\DET\\'
 # valid_data_dir = 'D:\\Qian\\GitHub\\workspace\\VGG\\'
 
 # directory for saving inference data

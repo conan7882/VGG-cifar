@@ -162,6 +162,9 @@ class VGG19_FCN(VGG19):
 
         # self.conv_output = tf.identity(conv5_4, 'conv_output')
         self.output = tf.identity(fc8, 'model_output')
+        filter_size = [tf.shape(fc8)[1], tf.shape(fc8)[2]]
+
+        self.avg_output = global_avg_pool(fc8)
 
     @staticmethod
     def load_pre_trained(session, model_path, skip_layer = []):

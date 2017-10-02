@@ -39,14 +39,18 @@ if __name__ == '__main__':
     # Create model
     VGG19 = VGG.VGG19_FCN(num_class = 1000)
     VGG19.create_model([image, keep_prob])
-    predict_op = tf.argmax(VGG19.output, dimension = -1)
+    predict_op = tf.argmax(VGG19.avg_output, dimension = -1)
 
     # dataset_val = ImageLabelFromFile('.JPEG', data_dir = config.valid_data_dir, 
     #                                 label_file_name = 'val_annotations.txt',
-    #                                 num_channel = 3, label_dict = {},
+    #                                 num_channel = 3, 
+    #                                 label_dict = {},
     #                                 shuffle = False)
-    dataset_val = ImageData('.JPEG', data_dir = config.valid_data_dir, 
-                            shuffle = False)
+    dataset_val = ImageFromFile('.JPEG', 
+                                num_channel = 3,
+                                data_dir = config.valid_data_dir, 
+                                shuffle = False)
+
     dataset_val.setup(epoch_val = 0, batch_size = 1)
     # o_label_dict = dataset_val.label_dict_reverse
 
@@ -65,9 +69,7 @@ if __name__ == '__main__':
         for k in range(0, 10):
             batch_data = dataset_val.next_batch()
             result = sess.run(predict_op, feed_dict = {image: batch_data[0]})
-            print(result.shape)
             print(result)
-        end
 
 
         # print([word_dict[o_label_dict[label]] for label in batch_data[1]])
