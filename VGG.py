@@ -13,10 +13,19 @@ import config
 VGG_MEAN = [103.939, 116.779, 123.68]
 
 class BaseVGG(BaseModel):
+    """ base of VGG class """
     def __init__(self, num_class = 1000, 
                  num_channels = 3, 
                  im_height = 224, im_width = 224,
                  learning_rate = 0.0001):
+        """ 
+        Args:
+            num_class (int): number of image classes
+            num_channels (int): number of input channels
+            im_height, im_width (int): size of input image
+                               Can be unknown when testing.
+            learning_rate (float): learning rate of training
+        """
 
         self.learning_rate = learning_rate
         self.num_channels = num_channels
@@ -100,7 +109,7 @@ class VGG19(BaseVGG):
         input_im = self.model_input[0]
         keep_prob = self.model_input[1]
 
-        # Convert rgb image to bgr image
+        # Convert RGB image to BGR image
         red, green, blue = tf.split(axis=3, num_or_size_splits=3, 
                                     value=input_im)
 
