@@ -27,7 +27,7 @@ For testing the pre-trained model
 
 ## Results
 - ### Image classification on ImageNet
-![pretrained_result](fig/pretrained.png =600x)
+![pretrained_result](fig/pretrained.png)
 
 
 ## Usage
