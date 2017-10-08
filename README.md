@@ -45,4 +45,6 @@ All directories are setup in *config.py*.
        $ python VGG_FCN_pre_trained.py
        
    The output are the top-5 class labels and probabilities, and the top-1 human label.
-
+   
+## Author
+Qian Ge
