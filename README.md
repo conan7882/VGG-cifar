@@ -42,7 +42,9 @@ All directories are setup in *config.py*.
 ### ImageNet Classification
 - Put test image in folder *`config.valid_data_dir`*, then run the script:
 
-       $ python VGG_FCN_pre_trained.py
+```
+python VGG_FCN_pre_trained.py
+```
        
    The output are the top-5 class labels and probabilities, and the top-1 human label.
    
