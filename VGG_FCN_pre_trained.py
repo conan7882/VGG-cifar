@@ -61,29 +61,29 @@ if __name__ == '__main__':
 
     # Setup inputs
     keep_prob = 1.0
-    image = tf.placeholder(tf.float32, name = 'image',
-                            shape = [None, None, None, 3])
+    image = tf.placeholder(tf.float32, name='image',
+                            shape=[None, None, None, 3])
 
     # Resize image with smallest side = 224
     input_im = resize_tensor_image_with_smallest_side(image, 224)
 
     # Create VGG-FCN model
     # Pre-trained parameters will be loaded if is_load = True
-    VGG19 = VGG.VGG19_FCN(is_load = True, pre_train_path = config_path.vgg_dir)
+    VGG19 = VGG.VGG19_FCN(is_load=True, pre_train_path=config_path.vgg_dir)
     VGG19.create_model([input_im, keep_prob])
 
     # Top 5 predictions
     predict_op = tf.nn.top_k(tf.nn.softmax(VGG19.avg_output), 
-                            k = 5, sorted = True)
+                            k=5, sorted=True)
 
     # Read image dataflow from a folder
     dataset_test = ImageFromFile('.JPEG', 
-                                num_channel = 3,
-                                data_dir = config_path.test_data_dir, 
-                                shuffle = False)
+                                num_channel=3,
+                                data_dir=config_path.test_data_dir, 
+                                shuffle=False)
 
     # Batch size has to be 1 if images have different size
-    dataset_test.setup(epoch_val = 0, batch_size = 1)
+    dataset_test.setup(epoch_val=0, batch_size=1)
     word_dict = get_word_list('./imageNetLabel.txt')
 
     with tf.Session() as sess:
@@ -96,7 +96,7 @@ if __name__ == '__main__':
         # Test first 50 image in the folder
         for k in range(0, 50):
             batch_data = dataset_test.next_batch()
-            result = sess.run(predict_op, feed_dict = {image: batch_data[0]})
+            result = sess.run(predict_op, feed_dict={image: batch_data[0]})
             for val, ind in zip(result.values, result.indices):
                 print(val)
                 print(ind)
