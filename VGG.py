@@ -119,6 +119,9 @@ class VGG19(BaseVGG):
         input_im = self.model_input[0]
         keep_prob = self.model_input[1]
 
+        # Force image size to be 224*224
+        # May get error if the input image size is not 224*224
+        input_im = tf.reshape(input_im, [-1, 224, 224, 3])
         # Convert RGB image to BGR image
         red, green, blue = tf.split(axis=3, num_or_size_splits=3, 
                                     value=input_im)
