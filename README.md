@@ -29,6 +29,12 @@ For testing the pre-trained model
 - ### Image classification on ImageNet
 ![pretrained_result](fig/pretrained.png)
 
+- ### Images from my photo collection
+<div align='left'>
+  <img src='fig/1.png' height='350px'>
+  <img src='fig/2.png' height="350px">
+</div>
+
 
 ## Usage
 ### Download pre-trained VGG19 model
