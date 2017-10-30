@@ -5,7 +5,8 @@
 vgg_dir = 'D:\\Qian\\GitHub\\workspace\\VGG\\vgg19.npy'
 
 # directory of testing data
-test_data_dir = 'D:\\Qian\\GitHub\\workspace\\dataset\\ImageNet\\ILSVRC2017_DET_test_new\\ILSVRC\\Data\\DET\\'
+# test_data_dir = 'D:\\Qian\\GitHub\\workspace\\dataset\\ImageNet\\ILSVRC2017_DET_test_new\\ILSVRC\\Data\\DET\\'
+test_data_dir = 'D:\\GoogleDrive_Qian\\GitHub\\workspace\\1\\'
 
 # directory of training data
 train_data_dir = 'D:\\Qian\\GitHub\\workspace\\dataset\\tiny-imagenet-200\\tiny-imagenet-200\\train\\'
