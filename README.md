@@ -49,7 +49,7 @@ All directories are setup in *config.py*.
 - Put test image in folder *`config.valid_data_dir`*, then run the script:
 
 ```
-python VGG_FCN_pre_trained.py
+python VGG_FCN_pre_trained.py --type IMAGE_FILE_EXTENSION(.jpg or .png or other types of images)
 ```
        
    The output are the top-5 class labels and probabilities, and the top-1 human label.
