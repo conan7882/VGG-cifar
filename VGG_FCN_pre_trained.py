@@ -1,7 +1,7 @@
 # File: VGG_pre_trained.py
 # Author: Qian Ge <geqian1001@gmail.com>
 import os
-
+import argparse
 import numpy as np
 import tensorflow as tf
 
@@ -20,7 +20,16 @@ def get_word_list(file_path):
         word_dict[i] = word
     return word_dict
 
+
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--type', default='.jpg', type=str, 
+                        help='image type for training and testing')
+
+    return parser.parse_args()
+
 if __name__ == '__main__':
+    FLAGS = get_args()
 
     # Setup inputs
     keep_prob = 1.0
@@ -37,7 +46,7 @@ if __name__ == '__main__':
                             k=5, sorted=True)
 
     # Read image dataflow from a folder
-    dataset_test = ImageFromFile('.jpg', 
+    dataset_test = ImageFromFile(FLAGS.type, 
                                 num_channel=3,
                                 data_dir=config_path.test_data_dir, 
                                 shuffle=False)
