@@ -1,7 +1,7 @@
 # VGG19-FCN for Image Classification
  - TensorFlow implementation of [Very Deep Convolutional Networks for Large-Scale Image Recognition](https://arxiv.org/abs/1409.1556). 
  
- - The VGG19 model is defined in *VGG.py*.
+ - The VGG19 model is defined in `VGG.py`.
 
  
 ## Requirements
@@ -40,13 +40,13 @@ For testing the pre-trained model
 ### Download pre-trained VGG19 model
 Download the pre-trained parameters VGG19 NPY [here](https://github.com/machrisaa/tensorflow-vgg#tensorflow-vgg16-and-vgg19).
 ### Config path
-All directories are setup in *config.py*.
+All directories are setup in `config.py`.
 
-- Put the pre-trained paramenters in *`config.model_dir`*.
-- Put testing images in *`config.valid_data_dir`*.
+- Put the pre-trained paramenters in `config.model_dir`.
+- Put testing images in `config.valid_data_dir`.
 
 ### ImageNet Classification
-- Put test image in folder *`config.valid_data_dir`*, then run the script:
+- Put test image in folder `config.valid_data_dir`, then run the script:
 
 ```
 python VGG_FCN_pre_trained.py --type IMAGE_FILE_EXTENSION(.jpg or .png or other types of images)
