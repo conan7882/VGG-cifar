@@ -75,7 +75,7 @@ class BaseVGG(BaseModel):
             learning_rate (float): learning rate of training
         """
 
-        self.learning_rate = learning_rate
+        self._lr = learning_rate
         self.num_channels = num_channels
         self.im_height = im_height
         self.im_width = im_width
@@ -107,6 +107,28 @@ class BaseVGG(BaseModel):
         self.set_train_placeholder([self.image, self.label])
         self.set_prediction_placeholder(self.image)
 
+    def _get_optimizer(self):
+        return tf.train.AdamOptimizer(beta1=0.9,
+                                      learning_rate=self._lr)
+
+    def _get_loss(self):
+        with tf.name_scope('loss'):
+            cross_entropy =\
+                tf.nn.sparse_softmax_cross_entropy_with_logits(
+                    labels=self.label,
+                    logits=self.layer['output'])
+            cross_entropy_loss = tf.reduce_mean(
+                cross_entropy, name='cross_entropy')
+            tf.add_to_collection('losses', cross_entropy_loss)
+            return tf.add_n(tf.get_collection('losses'), name='result')
+
+    def get_train_op(self):
+        grads = self.get_grads()
+        opt = self.get_optimizer()
+        train_op = opt.apply_gradients(grads, name='train')
+        # self._setup_summery()
+
+        return train_op
 
 class VGG19(BaseVGG):
 
