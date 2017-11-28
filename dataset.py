@@ -6,7 +6,7 @@
 import os
 import numpy as np
 
-from tensorcv.dataflow.image import ImageLabelFromFile
+from tensorcv.dataflow.image import ImageLabelFromFile, ImageFromFile
 from tensorcv.dataflow.common import dense_to_one_hot
 
 
@@ -58,6 +58,28 @@ class ImageLabelFromCSVFile(ImageLabelFromFile):
         if self._shuffle:
             self._suffle_file_list()
 
+class new_ImageFromFile(ImageFromFile):
+    def next_batch(self):
+        assert self._batch_size <= self.size(), \
+        "batch_size cannot be larger than data size"
+
+        if self._data_id + self._batch_size > self.size():
+            start = self._data_id
+            end = self.size()
+            print(end)
+            self._epochs_completed += 1
+            self._data_id = 0
+            if self._shuffle:
+                self._suffle_file_list()
+        else:
+
+            start = self._data_id
+            self._data_id += self._batch_size
+            end = self._data_id
+        # batch_file_range = range(start, end)
+
+        return self._load_data(start, end)
+
 
 if __name__ == '__main__':
     data_dir = '/Users/gq/workspace/Dataset/kaggle/dog_bleed/train/'
@@ -65,4 +87,4 @@ if __name__ == '__main__':
                               label_file_name='../labels.csv',
                               num_channel=3)
 
-    print(d._label_list)
+    print(d.label_dict)
