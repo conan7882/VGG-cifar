@@ -71,17 +71,16 @@ class VGG19_Finetune(BaseModel):
 
         arg_scope = tf.contrib.framework.arg_scope
         with arg_scope([fc], trainable=self._train_fc):
-            fc6 = fc(conv_out, 4096, 'fc6', nl=tf.nn.relu)
+            fc6 = fc(conv_out, 1024, 'fc6', nl=tf.nn.relu)
             dropout_fc6 = dropout(fc6, keep_prob, self.is_training)
 
-            fc7 = fc(dropout_fc6, 4096, 'fc7', nl=tf.nn.relu)
-            dropout_fc7 = dropout(fc7, keep_prob, self.is_training)
+            # fc7 = fc(dropout_fc6, 4096, 'fc7', nl=tf.nn.relu)
+            # dropout_fc7 = dropout(fc7, keep_prob, self.is_training)
 
-            fc8 = fc(dropout_fc7, self.nclass, 'fc8')
+            fc7 = fc(dropout_fc6, self.nclass, 'fc8')
 
             self.layer['fc6'] = fc6
-            self.layer['fc7'] = fc7
-            self.layer['fc8'] = self.layer['output'] = fc8
+            self.layer['fc7'] = self.layer['output'] = fc7
             self.layer['class_prob'] = tf.nn.softmax(fc8, name='class_prob')
             self.layer['pre_prob'] = tf.reduce_max(self.layer['class_prob'], axis=-1, name='pre_prob')
 
