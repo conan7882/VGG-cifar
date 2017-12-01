@@ -5,9 +5,35 @@
 
 import os
 import numpy as np
+import copy
 
 from tensorcv.dataflow.image import ImageLabelFromFile, ImageFromFile
 from tensorcv.dataflow.common import dense_to_one_hot
+from tensorcv.dataflow.base import DataFlow
+from tensorcv.utils.utils import assert_type
+
+
+def separate_data(dataflow, separate_ratio=0.5, class_base=False):
+    assert_type(dataflow, DataFlow)
+    assert separate_ratio > 0 and separate_ratio < 1,\
+        'separate_ratio must be within (0, 1)!'
+    dataflow.suffle_data()
+    o_data_list = dataflow.get_data_list()
+    o_label_list = dataflow.get_label_list()
+
+    if class_base:
+        print('*** Not Implemented ! ***')
+    else:
+        n_data = len(o_data_list)
+        n_part_1 = int(np.ceil(n_data * separate_ratio))
+        dataflow_1 = copy.copy(dataflow)
+        dataflow_2 = copy.copy(dataflow)
+        dataflow_1.set_data_list(o_data_list[:n_part_1])
+        dataflow_1.set_label_list(o_label_list[:n_part_1])
+        dataflow_2.set_data_list(o_data_list[n_part_1:])
+        dataflow_2.set_label_list(o_label_list[n_part_1:])
+
+    return dataflow_1, dataflow_2
 
 
 class ImageLabelFromCSVFile(ImageLabelFromFile):
@@ -58,6 +84,22 @@ class ImageLabelFromCSVFile(ImageLabelFromFile):
         if self._shuffle:
             self._suffle_file_list()
 
+    def get_data_list(self):
+        return self._im_list
+
+    def set_data_list(self, new_list):
+        self._im_list = new_list
+
+    def get_label_list(self):
+        return self._label_list
+
+    def set_label_list(self, new_list):
+        self._label_list = new_list
+
+    def suffle_data(self):
+        self._suffle_file_list()
+
+
 class new_ImageFromFile(ImageFromFile):
     def next_batch(self):
         assert self._batch_size <= self.size(), \
@@ -87,4 +129,7 @@ if __name__ == '__main__':
                               label_file_name='../labels.csv',
                               num_channel=3)
 
-    print(d.label_dict)
+    # print(d.label_dict)
+    d_1, d_2 = separate_data(d, separate_ratio=0.7, class_base=False)
+    print(d_1.size(), d_2.size(), d.size())
+
