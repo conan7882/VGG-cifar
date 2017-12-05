@@ -13,11 +13,12 @@ from tensorcv.dataflow.base import DataFlow
 from tensorcv.utils.utils import assert_type
 
 
-def separate_data(dataflow, separate_ratio=0.5, class_base=False):
+def separate_data(dataflow, separate_ratio=0.5, class_base=False, shuffle=False):
     assert_type(dataflow, DataFlow)
     assert separate_ratio > 0 and separate_ratio < 1,\
         'separate_ratio must be within (0, 1)!'
-    dataflow.suffle_data()
+    if shuffle:
+        dataflow.suffle_data()
     o_data_list = dataflow.get_data_list()
     o_label_list = dataflow.get_label_list()
 
@@ -81,8 +82,8 @@ class ImageLabelFromCSVFile(ImageLabelFromFile):
         if self._one_hot:
             self._label_list = dense_to_one_hot(self._label_list, self._num_class)
 
-        if self._shuffle:
-            self._suffle_file_list()
+        # if self._shuffle:
+        #     self._suffle_file_list()
 
     def get_data_list(self):
         return self._im_list
@@ -131,5 +132,5 @@ if __name__ == '__main__':
 
     # print(d.label_dict)
     d_1, d_2 = separate_data(d, separate_ratio=0.7, class_base=False)
-    print(d_1.size(), d_2.size(), d.size())
+    print(len(set(d_1._label_list)), len(set(d_2._label_list)), d.size())
 

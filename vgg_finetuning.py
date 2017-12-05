@@ -50,7 +50,7 @@ class VGG19_Finetune(BaseModel):
         self.label = tf.placeholder(tf.int64, [None], 'label')
 
         self.set_model_input([self.image, self.keep_prob])
-        self.set_dropout(self.keep_prob, keep_prob=0.5)
+        self.set_dropout(self.keep_prob, keep_prob=0.3)
         self.set_train_placeholder([self.image, self.label])
         self.set_prediction_placeholder([self.image, self.label])
 
@@ -69,18 +69,28 @@ class VGG19_Finetune(BaseModel):
         vgg_conv.create_model([input_im, keep_prob])
         conv_out = vgg_conv.layer['pool5']
 
+        gap = global_avg_pool(conv_out)
+
         arg_scope = tf.contrib.framework.arg_scope
-        with arg_scope([fc], trainable=self._train_fc):
-            fc6 = fc(conv_out, 1024, 'fc6', nl=tf.nn.relu)
-            dropout_fc6 = dropout(fc6, keep_prob, self.is_training)
+        with arg_scope([fc], trainable=self._train_fc, wd=5e-4):
+            fc6 = fc(gap, 512, 'fc6')
+            fc6_bn = batch_norm(fc6, train=self.is_training, name='fc6_bn')
+            fc6_act = tf.nn.relu(fc6_bn)
+            dropout_fc6 = dropout(fc6_act, keep_prob, self.is_training)
+
+            fc7 = fc(dropout_fc6, 1024, 'fc7')
+            fc7_bn = batch_norm(fc7, train=self.is_training, name='fc7_bn')
+            fc7_act = tf.nn.relu(fc7_bn)
+            dropout_fc7 = dropout(fc7_act, keep_prob, self.is_training)
 
             # fc7 = fc(dropout_fc6, 4096, 'fc7', nl=tf.nn.relu)
             # dropout_fc7 = dropout(fc7, keep_prob, self.is_training)
 
-            fc7 = fc(dropout_fc6, self.nclass, 'fc8')
+            fc8 = fc(dropout_fc7, self.nclass, 'fc8')
 
             self.layer['fc6'] = fc6
-            self.layer['fc7'] = self.layer['output'] = fc7
+            # self.layer['fc7'] = fc7
+            self.layer['fc8'] = self.layer['output'] = fc8
             self.layer['class_prob'] = tf.nn.softmax(fc8, name='class_prob')
             self.layer['pre_prob'] = tf.reduce_max(self.layer['class_prob'], axis=-1, name='pre_prob')
 
@@ -96,6 +106,7 @@ class VGG19_Finetune(BaseModel):
                     logits=self.layer['output'])
             cross_entropy_loss = tf.reduce_mean(
                 cross_entropy, name='cross_entropy')
+            tf.summary.scalar('cross_entropy_loss', cross_entropy_loss, collections=['train'])
             tf.add_to_collection('losses', cross_entropy_loss)
             return tf.add_n(tf.get_collection('losses'), name='result')
 
