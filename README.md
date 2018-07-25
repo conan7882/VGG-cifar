@@ -38,7 +38,7 @@ For testing the pre-trained model
 
 ## Usage
 ### Download pre-trained VGG19 model
-Download the pre-trained parameters VGG19 NPY [here](https://github.com/machrisaa/tensorflow-vgg#tensorflow-vgg16-and-vgg19).
+Download the pre-trained parameters VGG19 NPY [here](https://www.dropbox.com/sh/dad57t3hl60jeb0/AADlcUshCnmN2bAZdgdkmxDna?dl=0). This is original downloaded from [here](https://github.com/machrisaa/tensorflow-vgg#tensorflow-vgg16-and-vgg19).
 ### Config path
 All directories are setup in `config.py`.
 
