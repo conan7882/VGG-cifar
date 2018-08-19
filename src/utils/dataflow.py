@@ -4,9 +4,11 @@
 # Author: Qian Ge <geqian1001@gmail.com>
 
 import os
-from datetime import datetime
-import numpy as np
 import scipy.misc
+import numpy as np
+from datetime import datetime
+
+import src.utils.utils as utils
 
 
 def identity(inputs):
@@ -25,13 +27,6 @@ def load_image(im_path, read_channel=None, pf=identity):
         im = np.reshape(im, [im.shape[0], im.shape[1], 1])
     else:
         im = pf(im)
-
-    # if len(im.shape) < 3:
-    #     im = pf(im)
-    #     im = np.reshape(im, [1, im.shape[0], im.shape[1], 1])
-    # else:
-    #     im = pf(im)
-    #     im = np.reshape(im, [1, im.shape[0], im.shape[1], im.shape[2]])
     return im
 
 
@@ -70,14 +65,15 @@ def fill_pf_list(pf_list, n_pf, fill_with_fnc=identity):
     if pf_list == None:
         return [identity for i in range(n_pf)]
     # pf_list = [pf for pf in pf_list if pf is not None else identity]
+    pf_list = utils.make_list(pf_list)
+
     new_list = []
     for pf in pf_list:
         if not pf:
             pf = identity
         new_list.append(pf)
     pf_list = new_list
-
-    pf_list = utils.make_list(pf_list)
+    
     if len(pf_list) > n_pf:
         raise ValueError('Invalid number of preprocessing functions')
     pf_list = pf_list + [fill_with_fnc for i in range(n_pf - len(pf_list))]

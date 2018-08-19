@@ -60,8 +60,8 @@ class BaseVGG(BaseModel):
             self.layers['conv_out'] = self._conv_layers(vgg_input)
         with tf.variable_scope('fc_layers', reuse=tf.AUTO_REUSE):   
             self.layers['logits'] = self._fc_layers(self.layers['conv_out'])
-            self.layers['gap_out'] = global_avg_pool(self.layers['logits'])
-            self.layer['top_5'] = tf.nn.top_k(
+            self.layers['gap_out'] = L.global_avg_pool(self.layers['logits'])
+            self.layers['top_5'] = tf.nn.top_k(
                 tf.nn.softmax(self.layers['gap_out']), k=5, sorted=True)
 
     def _conv_layers(self, inputs):
@@ -69,7 +69,7 @@ class BaseVGG(BaseModel):
 
     def _fc_layers(self, inputs):
         fc_out = module.vgg_fc(
-            layer_dict=self.layers, n_class=n_class, keep_prob=self.keep_prob,
+            layer_dict=self.layers, n_class=self.n_class, keep_prob=self.keep_prob,
             inputs=inputs, pretrained_dict=self._pretrained_dict,
             bn=self._bn, init_w=INIT_W, trainable=self._trainable,
             is_training=self.is_training, wd=self._wd)

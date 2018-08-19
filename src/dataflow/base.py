@@ -116,3 +116,7 @@ class DataFlow(object):
 
     def get_batch_file_name(self):
         return self._cur_file_name
+
+    @property
+    def epochs_completed(self):
+        return self._epochs_completed
