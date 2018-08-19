@@ -1,4 +1,6 @@
-# File: VGG.py
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# File: vgg.py
 # Author: Qian Ge <geqian1001@gmail.com>
 
 import numpy as np
@@ -10,23 +12,25 @@ from tensorcv.models.base import BaseModel
 
 VGG_MEAN = [103.939, 116.779, 123.68]
 
+
 def resize_tensor_image_with_smallest_side(image, small_size):
     """
     Resize image tensor with smallest side = small_size and
     keep the original aspect ratio.
 
     Args:
-        image (tf.tensor): 4-D Tensor of shape [batch, height, width, channels] 
-            or 3-D Tensor of shape [height, width, channels].
+        image (tf.tensor): 4-D Tensor of shape
+            [batch, height, width, channels] or 3-D Tensor of shape
+            [height, width, channels].
         small_size (int): A 1-D int. The smallest side of resize image.
 
     Returns:
-        Image tensor with the original aspect ratio and 
+        Image tensor with the original aspect ratio and
         smallest side = small_size .
-        If images was 4-D, a 4-D float Tensor of shape 
-        [batch, new_height, new_width, channels]. 
-        If images was 3-D, a 3-D float Tensor of shape 
-        [new_height, new_width, channels].       
+        If images was 4-D, a 4-D float Tensor of shape
+        [batch, new_height, new_width, channels].
+        If images was 3-D, a 3-D float Tensor of shape
+        [new_height, new_width, channels].
     """
     im_shape = tf.shape(image)
     shape_dim = image.get_shape()
@@ -41,24 +45,30 @@ def resize_tensor_image_with_smallest_side(image, small_size):
 
     new_shorter_edge = tf.constant(small_size, tf.float32)
     new_height, new_width = tf.cond(
-    height_smaller_than_width,
-    lambda: (new_shorter_edge, (width/height)*new_shorter_edge),
-    lambda: ((height/width)*new_shorter_edge, new_shorter_edge))
+        height_smaller_than_width,
+        lambda: (new_shorter_edge, (width / height) * new_shorter_edge),
+        lambda: ((height / width) * new_shorter_edge, new_shorter_edge))
 
-    return tf.image.resize_images(tf.cast(image, tf.float32), 
+    return tf.image.resize_images(
+        tf.cast(image, tf.float32),
         [tf.cast(new_height, tf.int32), tf.cast(new_width, tf.int32)])
+
 
 class BaseVGG(BaseModel):
     """ base of VGG class """
-    def __init__(self, num_class=1000, 
-                 num_channels=3, 
-                 im_height=224, im_width=224,
+    def __init__(self,
+                 num_class=1000,
+                 num_channels=3,
+                 im_height=224,
+                 im_width=224,
                  learning_rate=0.0001,
                  is_load=False,
                  pre_train_path=None,
                  is_rescale=False,
-                 trainable=False):
-        """ 
+                 trainable_conv_12=False,
+                 trainable_conv_3up=False,
+                 trainable_fc=False):
+        """
         Args:
             num_class (int): number of image classes
             num_channels (int): number of input channels
@@ -67,13 +77,15 @@ class BaseVGG(BaseModel):
             learning_rate (float): learning rate of training
         """
 
-        self.learning_rate = learning_rate
+        self._lr = learning_rate
         self.num_channels = num_channels
         self.im_height = im_height
         self.im_width = im_width
         self.num_class = num_class
         self._is_rescale = is_rescale
-        self._trainable = trainable
+        self._train_12 = trainable_conv_12
+        self._train_3up = trainable_conv_3up
+        self._train_fc = trainable_fc
 
         self.layer = {}
 
@@ -86,17 +98,47 @@ class BaseVGG(BaseModel):
 
     def _create_input(self):
         self.keep_prob = tf.placeholder(tf.float32, name='keep_prob')
-        self.image = tf.placeholder(tf.float32, name='image',
-                            shape=[None, self.im_height, self.im_width, self.num_channels])
+        self.image = tf.placeholder(
+            tf.float32, name='image',
+            shape=[None, self.im_height, self.im_width, self.num_channels])
 
         self.label = tf.placeholder(tf.int64, [None], 'label')
-        # self.label = tf.placeholder(tf.int64, [None, self.num_class], 'label')
 
         self.set_model_input([self.image, self.keep_prob])
         self.set_dropout(self.keep_prob, keep_prob=0.5)
         self.set_train_placeholder([self.image, self.label])
         self.set_prediction_placeholder(self.image)
 
+    def _get_optimizer(self):
+        return tf.train.AdamOptimizer(beta1=0.9,
+                                      learning_rate=self._lr)
+
+    def _get_loss(self):
+        with tf.name_scope('loss'):
+            cross_entropy =\
+                tf.nn.sparse_softmax_cross_entropy_with_logits(
+                    labels=self.label,
+                    logits=self.layer['output'])
+            cross_entropy_loss = tf.reduce_mean(
+                cross_entropy, name='cross_entropy')
+            tf.add_to_collection('losses', cross_entropy_loss)
+            return tf.add_n(tf.get_collection('losses'), name='result')
+
+    def get_train_op(self):
+        grads = self.get_grads()
+        opt = self.get_optimizer()
+        train_op = opt.apply_gradients(grads, name='train')
+        # self._setup_summery()
+
+        return train_op
+
+    def _setup_graph(self):
+        with tf.name_scope('accuracy'):
+            prediction = tf.argmax(self.layer['output'])
+            correct_prediction = tf.equal(prediction, self.label)
+            self.accuracy = tf.reduce_mean(
+                        tf.cast(correct_prediction, tf.float32), 
+                        name = 'result')
 
 class VGG19(BaseVGG):
 
@@ -105,13 +147,13 @@ class VGG19(BaseVGG):
 
         with tf.name_scope('input'):
             input_im = self.model_input[0]
-            keep_prob = self.model_input[1]
 
             if self._is_rescale:
-                input_im = resize_tensor_image_with_smallest_side(input_im, 224)
+                input_im =\
+                    resize_tensor_image_with_smallest_side(input_im, 224)
             self.layer['input'] = input_im
             # Convert RGB image to BGR image
-            red, green, blue = tf.split(axis=3, num_or_size_splits=3, 
+            red, green, blue = tf.split(axis=3, num_or_size_splits=3,
                                         value=input_im)
 
             input_bgr = tf.concat(axis=3, values=[
@@ -122,41 +164,43 @@ class VGG19(BaseVGG):
 
         data_dict = {}
         if self._is_load:
-            data_dict = np.load(self._pre_train_path, encoding='latin1').item() 
+            data_dict = np.load(self._pre_train_path,
+                                encoding='latin1').item()
 
         self._create_conv(input_bgr, data_dict)
-
-
 
     def _create_conv(self, input_im, data_dict):
 
         arg_scope = tf.contrib.framework.arg_scope
-        with arg_scope([conv], nl=tf.nn.relu, trainable=self._trainable, data_dict=data_dict):
+        with arg_scope([conv], nl=tf.nn.relu, trainable=self._train_12,
+                       data_dict=data_dict):
             conv1_1 = conv(input_im, 3, 64, 'conv1_1')
             conv1_2 = conv(conv1_1, 3, 64, 'conv1_2')
-            pool1 = max_pool(conv1_2, 'pool1', padding='SAME')
+            pool1 = max_pool(conv1_2, 'pool1', padding='VALID')
 
             conv2_1 = conv(pool1, 3, 128, 'conv2_1')
             conv2_2 = conv(conv2_1, 3, 128, 'conv2_2')
-            pool2 = max_pool(conv2_2, 'pool2', padding='SAME')
+            pool2 = max_pool(conv2_2, 'pool2', padding='VALID')
 
+        with arg_scope([conv], nl=tf.nn.relu, trainable=self._train_3up,
+                       data_dict=data_dict):
             conv3_1 = conv(pool2, 3, 256, 'conv3_1')
             conv3_2 = conv(conv3_1, 3, 256, 'conv3_2')
             conv3_3 = conv(conv3_2, 3, 256, 'conv3_3')
             conv3_4 = conv(conv3_3, 3, 256, 'conv3_4')
-            pool3 = max_pool(conv3_4, 'pool3', padding='SAME')
+            pool3 = max_pool(conv3_4, 'pool3', padding='VALID')
 
             conv4_1 = conv(pool3, 3, 512, 'conv4_1')
             conv4_2 = conv(conv4_1, 3, 512, 'conv4_2')
             conv4_3 = conv(conv4_2, 3, 512, 'conv4_3')
             conv4_4 = conv(conv4_3, 3, 512, 'conv4_4')
-            pool4 = max_pool(conv4_4, 'pool4', padding='SAME')
+            pool4 = max_pool(conv4_4, 'pool4', padding='VALID')
 
             conv5_1 = conv(pool4, 3, 512, 'conv5_1')
             conv5_2 = conv(conv5_1, 3, 512, 'conv5_2')
             conv5_3 = conv(conv5_2, 3, 512, 'conv5_3')
             conv5_4 = conv(conv5_3, 3, 512, 'conv5_4')
-            pool5 = max_pool(conv5_4, 'pool5', padding='SAME')
+            pool5 = max_pool(conv5_4, 'pool5', padding='VALID')
 
             self.layer['conv1_1'] = conv1_1
             self.layer['conv1_2'] = conv1_2
@@ -183,7 +227,7 @@ class VGG19(BaseVGG):
 
             self.layer['input'] = input_im
             # Convert RGB image to BGR image
-            red, green, blue = tf.split(axis=3, num_or_size_splits=3, 
+            red, green, blue = tf.split(axis=3, num_or_size_splits=3,
                                         value=input_im)
 
             input_bgr = tf.concat(axis=3, values=[
@@ -194,12 +238,13 @@ class VGG19(BaseVGG):
 
         data_dict = {}
         if self._is_load:
-            data_dict = np.load(self._pre_train_path, encoding='latin1').item()  
+            data_dict = np.load(self._pre_train_path,
+                                encoding='latin1').item()
 
         conv_output = self._create_conv(input_bgr, data_dict)
-        
+
         arg_scope = tf.contrib.framework.arg_scope
-        with arg_scope([fc], trainable=self._trainable, data_dict=data_dict):
+        with arg_scope([fc], trainable=self._train_fc, data_dict=data_dict):
             fc6 = fc(conv_output, 4096, 'fc6', nl=tf.nn.relu)
             dropout_fc6 = dropout(fc6, keep_prob, self.is_training)
 
@@ -211,7 +256,7 @@ class VGG19(BaseVGG):
             self.layer['fc6'] = fc6
             self.layer['fc7'] = fc7
             self.layer['fc8'] = self.layer['output'] = fc8
-            
+
 
 class VGG19_FCN(VGG19):
 
@@ -222,11 +267,12 @@ class VGG19_FCN(VGG19):
             keep_prob = self.model_input[1]
 
             if self._is_rescale:
-                input_im = resize_tensor_image_with_smallest_side(input_im, 224)
+                input_im =\
+                    resize_tensor_image_with_smallest_side(input_im, 224)
             self.layer['input'] = input_im
 
             # Convert rgb image to bgr image
-            red, green, blue = tf.split(axis=3, num_or_size_splits=3, 
+            red, green, blue = tf.split(axis=3, num_or_size_splits=3,
                                         value=input_im)
 
             input_bgr = tf.concat(axis=3, values=[
@@ -242,12 +288,14 @@ class VGG19_FCN(VGG19):
         conv_outptu = self._create_conv(input_bgr, data_dict)
 
         arg_scope = tf.contrib.framework.arg_scope
-        with arg_scope([conv], trainable=self._trainable, data_dict=data_dict):
+        with arg_scope([conv], trainable=self._train_fc, data_dict=data_dict):
 
-            fc6 = conv(conv_outptu, 7, 4096, 'fc6', nl=tf.nn.relu, padding='VALID')
+            fc6 = conv(conv_outptu, 7, 4096, 'fc6',
+                       nl=tf.nn.relu, padding='VALID')
             dropout_fc6 = dropout(fc6, keep_prob, self.is_training)
 
-            fc7 = conv(dropout_fc6, 1, 4096, 'fc7', nl=tf.nn.relu, padding='VALID')
+            fc7 = conv(dropout_fc6, 1, 4096, 'fc7',
+                       nl=tf.nn.relu, padding='VALID')
             dropout_fc7 = dropout(fc7, keep_prob, self.is_training)
 
             fc8 = conv(dropout_fc7, 1, self.num_class, 'fc8', padding='VALID')
@@ -255,30 +303,110 @@ class VGG19_FCN(VGG19):
             self.layer['fc6'] = fc6
             self.layer['fc7'] = fc7
             self.layer['fc8'] = self.layer['output'] = fc8
-            
 
         self.output = tf.identity(fc8, 'model_output')
-        filter_size = [tf.shape(fc8)[1], tf.shape(fc8)[2]]
-
         self.avg_output = global_avg_pool(fc8)
-
- 
-
-# if __name__ == '__main__':
-#     VGG = VGG19(num_class=1000, 
-#                 num_channels=3, 
-#                 im_height=224, 
-#                 im_width=224)
-    
-#     VGG.create_graph()
-
-#     writer = tf.summary.FileWriter(config.summary_dir)
-#     with tf.Session() as sess:
-#         sess.run(tf.global_variables_initializer())
-#         writer.add_graph(sess.graph)
-
-#     writer.close()
+        self.layer['gap_out'] = self.avg_output
 
 
+class VGG16_FCN(VGG19_FCN):
 
- 
+    def _create_conv(self, input_im, data_dict):
+
+        arg_scope = tf.contrib.framework.arg_scope
+        with arg_scope([conv], nl=tf.nn.relu, trainable=self._train_12,
+                       data_dict=data_dict):
+            conv1_1 = conv(input_im, 3, 64, 'conv1_1')
+            conv1_2 = conv(conv1_1, 3, 64, 'conv1_2')
+            pool1 = max_pool(conv1_2, 'pool1', padding='VALID')
+
+            conv2_1 = conv(pool1, 3, 128, 'conv2_1')
+            conv2_2 = conv(conv2_1, 3, 128, 'conv2_2')
+            pool2 = max_pool(conv2_2, 'pool2', padding='VALID')
+
+        with arg_scope([conv], nl=tf.nn.relu, trainable=self._train_3up,
+                       data_dict=data_dict):
+            conv3_1 = conv(pool2, 3, 256, 'conv3_1')
+            conv3_2 = conv(conv3_1, 3, 256, 'conv3_2')
+            conv3_3 = conv(conv3_2, 3, 256, 'conv3_3')
+            pool3 = max_pool(conv3_3, 'pool3', padding='VALID')
+
+            conv4_1 = conv(pool3, 3, 512, 'conv4_1')
+            conv4_2 = conv(conv4_1, 3, 512, 'conv4_2')
+            conv4_3 = conv(conv4_2, 3, 512, 'conv4_3')
+            pool4 = max_pool(conv4_3, 'pool4', padding='VALID')
+
+            conv5_1 = conv(pool4, 3, 512, 'conv5_1')
+            conv5_2 = conv(conv5_1, 3, 512, 'conv5_2')
+            conv5_3 = conv(conv5_2, 3, 512, 'conv5_3')
+            pool5 = max_pool(conv5_3, 'pool5', padding='VALID')
+
+            self.layer['conv1_1'] = conv1_1
+            self.layer['conv1_2'] = conv1_2
+            self.layer['conv2_1'] = conv2_1
+            self.layer['conv2_2'] = conv2_2
+            self.layer['conv3_1'] = conv3_1
+            self.layer['conv3_3'] = conv3_3
+            self.layer['conv4_1'] = conv4_1
+            self.layer['conv4_2'] = conv4_2
+            self.layer['conv4_3'] = conv4_3
+            self.layer['conv5_1'] = conv5_1
+            self.layer['pool5'] = pool5
+            self.layer['conv_out'] = self.layer['conv5_3'] = conv5_3
+
+        return pool5
+
+
+class VGG16_conv(VGG16_FCN):
+
+    def _create_model(self):
+        with tf.name_scope('input'):
+            input_im = self.model_input[0]
+
+            if self._is_rescale:
+                input_im =\
+                    resize_tensor_image_with_smallest_side(input_im, 224)
+            self.layer['input'] = input_im
+
+            # Convert rgb image to bgr image
+            red, green, blue = tf.split(axis=3, num_or_size_splits=3,
+                                        value=input_im)
+
+            input_bgr = tf.concat(axis=3, values=[
+                blue - VGG_MEAN[0],
+                green - VGG_MEAN[1],
+                red - VGG_MEAN[2],
+            ])
+
+        data_dict = {}
+        if self._is_load:
+            data_dict = np.load(self._pre_train_path, encoding='latin1').item()
+
+        self._create_conv(input_bgr, data_dict)
+
+
+class VGG19_conv(VGG19_FCN):
+    def _create_model(self):
+        with tf.name_scope('input'):
+            input_im = self.model_input[0]
+
+            if self._is_rescale:
+                input_im =\
+                    resize_tensor_image_with_smallest_side(input_im, 224)
+            self.layer['input'] = input_im
+
+            # Convert rgb image to bgr image
+            red, green, blue = tf.split(axis=3, num_or_size_splits=3,
+                                        value=input_im)
+
+            input_bgr = tf.concat(axis=3, values=[
+                blue - VGG_MEAN[0],
+                green - VGG_MEAN[1],
+                red - VGG_MEAN[2],
+            ])
+
+        data_dict = {}
+        if self._is_load:
+            data_dict = np.load(self._pre_train_path, encoding='latin1').item()
+
+        self._create_conv(input_bgr, data_dict)

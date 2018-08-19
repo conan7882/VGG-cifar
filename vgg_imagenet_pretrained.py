@@ -1,13 +1,15 @@
-# File: VGG_pre_trained.py
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# File: vgg_imagenet_pretrained.py
 # Author: Qian Ge <geqian1001@gmail.com>
+
 import os
 import argparse
-import numpy as np
 import tensorflow as tf
 
-from tensorcv.dataflow.image import *
+from tensorcv.dataflow.image import ImageFromFile
 
-import VGG
+import vgg
 import config as config_path
 
 
@@ -23,10 +25,11 @@ def get_word_list(file_path):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--type', default='.jpg', type=str, 
+    parser.add_argument('--type', default='.jpg', type=str,
                         help='image type for training and testing')
 
     return parser.parse_args()
+
 
 if __name__ == '__main__':
     FLAGS = get_args()
@@ -34,22 +37,24 @@ if __name__ == '__main__':
     # Setup inputs
     keep_prob = 1.0
     image = tf.placeholder(tf.float32, name='image',
-                            shape=[None, None, None, 3])
+                           shape=[None, None, None, 3])
 
     # Create VGG-FCN model
     # Pre-trained parameters will be loaded if is_load = True
-    VGG19 = VGG.VGG19_FCN(is_load=True, pre_train_path=config_path.vgg_dir,is_rescale=True)
+    VGG19 = VGG.VGG19_FCN(is_load=True,
+                          pre_train_path=config_path.vgg_dir,
+                          is_rescale=True)
     VGG19.create_model([image, keep_prob])
 
     # Top 5 predictions
-    predict_op = tf.nn.top_k(tf.nn.softmax(VGG19.avg_output), 
-                            k=5, sorted=True)
+    predict_op = tf.nn.top_k(tf.nn.softmax(VGG19.avg_output),
+                             k=5, sorted=True)
 
     # Read image dataflow from a folder
-    dataset_test = ImageFromFile(FLAGS.type, 
-                                num_channel=3,
-                                data_dir=config_path.test_data_dir, 
-                                shuffle=False)
+    dataset_test = ImageFromFile(FLAGS.type,
+                                 num_channel=3,
+                                 data_dir=config_path.test_data_dir,
+                                 shuffle=False)
 
     # Batch size has to be 1 if images have different size
     dataset_test.setup(epoch_val=0, batch_size=1)
@@ -67,9 +72,3 @@ if __name__ == '__main__':
                     print(val)
                     print(ind)
                     print(word_dict[ind[0]])
-
-    
-
-
-
- 
