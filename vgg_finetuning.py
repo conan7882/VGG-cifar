@@ -20,7 +20,8 @@ class VGG19_Finetune(BaseModel):
                  is_rescale=False,
                  trainable_conv_12=False,
                  trainable_conv_3up=False,
-                 trainable_fc=False):
+                 trainable_fc=False,
+                 drop_out=0.3):
 
         self._lr = learning_rate
         self.nchannel = num_channels
@@ -31,6 +32,7 @@ class VGG19_Finetune(BaseModel):
         self._train_low = trainable_conv_12
         self._train_high = trainable_conv_3up
         self._train_fc = trainable_fc
+        self._dropout = drop_out
 
         self.layer = {}
 
@@ -50,7 +52,7 @@ class VGG19_Finetune(BaseModel):
         self.label = tf.placeholder(tf.int64, [None], 'label')
 
         self.set_model_input([self.image, self.keep_prob])
-        self.set_dropout(self.keep_prob, keep_prob=0.3)
+        self.set_dropout(self.keep_prob, keep_prob=self._dropout)
         self.set_train_placeholder([self.image, self.label])
         self.set_prediction_placeholder([self.image, self.label])
 
@@ -73,12 +75,12 @@ class VGG19_Finetune(BaseModel):
 
         arg_scope = tf.contrib.framework.arg_scope
         with arg_scope([fc], trainable=self._train_fc, wd=5e-4):
-            fc6 = fc(gap, 512, 'fc6')
+            fc6 = fc(gap, 1024, 'fc6')
             fc6_bn = batch_norm(fc6, train=self.is_training, name='fc6_bn')
             fc6_act = tf.nn.relu(fc6_bn)
             dropout_fc6 = dropout(fc6_act, keep_prob, self.is_training)
 
-            fc7 = fc(dropout_fc6, 1024, 'fc7')
+            fc7 = fc(dropout_fc6, 2048, 'fc7')
             fc7_bn = batch_norm(fc7, train=self.is_training, name='fc7_bn')
             fc7_act = tf.nn.relu(fc7_bn)
             dropout_fc7 = dropout(fc7_act, keep_prob, self.is_training)

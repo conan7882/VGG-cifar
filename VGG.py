@@ -56,9 +56,11 @@ def resize_tensor_image_with_smallest_side(image, small_size):
 
 class BaseVGG(BaseModel):
     """ base of VGG class """
-    def __init__(self, num_class=1000,
+    def __init__(self,
+                 num_class=1000,
                  num_channels=3,
-                 im_height=224, im_width=224,
+                 im_height=224,
+                 im_width=224,
                  learning_rate=0.0001,
                  is_load=False,
                  pre_train_path=None,

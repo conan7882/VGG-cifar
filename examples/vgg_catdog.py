@@ -5,6 +5,7 @@
 
 from collections import namedtuple
 import argparse
+import os
 
 import tensorflow as tf
 
@@ -14,37 +15,55 @@ from tensorcv.predicts.predictions import *
 from tensorcv.predicts.simple import SimpleFeedPredictor
 from tensorcv.train.simple import SimpleFeedTrainer
 from tensorcv.callbacks import *
-from tensorcv.dataflow.image import ImageFromFile
-from dataset import ImageLabelFromCSVFile, new_ImageFromFile, separate_data
-from vgg_finetuning import VGG19_Finetune
+from tensorcv.dataflow.image import ImageFromFile, ImageLabelFromFolder
 
-DATA_DIR = '/home/qge2/workspace/data/dataset/dog_bleed/train/'
-TEST_DIR = '/home/qge2/workspace/data/dataset/dog_bleed/test/'
+import setup_env
+# from dataflow.dataset import ImageLabelFromFolder, new_ImageFromFile, separate_data
+from models.vgg_catvsdog import VGG19_CatDog
+
+TRAIN_DIR = '/home/qge2/workspace/data/dataset/dogvscat/train/'
+VALID_DIR = '/home/qge2/workspace/data/dataset/dogvscat/val/'
+TEST_DIR = '/home/qge2/workspace/data/dataset/dogvscat/test/'
 VGG_PATH = '/home/qge2/workspace/data/pretrain/vgg/vgg19.npy'
-SAVE_DIR = '/home/qge2/workspace/data/tmp2/'
+SAVE_DIR = '/home/qge2/workspace/data/dogcat/'
 configpath = namedtuple('CONFIG_PATH', ['summary_dir', 'checkpoint_dir', 'model_dir', 'result_dir'])
 config_path = configpath(summary_dir=SAVE_DIR, checkpoint_dir=SAVE_DIR, model_dir=SAVE_DIR, result_dir=SAVE_DIR)
 
 
+def display_data(dataflow, data_name):
+    try:
+        print('[{}] num of samples {}, num of classes {}'.\
+            format(data_name, dataflow.size(), len(dataflow.label_dict)))
+    except AttributeError:
+        print('[{}] num of samples {}'.\
+            format(data_name, dataflow.size()))
+
 def config_train(FLAGS):
-    dataset = ImageLabelFromCSVFile('.jpg', data_dir=DATA_DIR, start_line=1,
-                              label_file_name='../labels.csv',
-                              num_channel=3, resize=224)
-    train_data, val_data = separate_data(dataset, separate_ratio=0.7,
-                                         class_base=False, shuffle=False)
+    if not os.path.isdir(SAVE_DIR):
+        os.mkdir(SAVE_DIR)
+
+    train_data = ImageLabelFromFolder('.jpg', data_dir=TRAIN_DIR,
+                                      num_channel=3, resize=224)
+
+    val_data = ImageLabelFromFolder('.jpg', data_dir=VALID_DIR,
+                                    num_channel=3, resize=224)
+
+    display_data(train_data, 'training data')
+    display_data(val_data, 'validation data')
 
     n_class = len(train_data.label_dict)
 
-    vgg_net = VGG19_Finetune(num_class=n_class,
-                             num_channels=3,
-                             learning_rate=FLAGS.lr,
-                             is_load=True,
-                             pre_train_path=VGG_PATH,
-                             is_rescale=False,
-                             im_height=224, im_width=224,
-                             trainable_conv_12=False,
-                             trainable_conv_3up=False,
-                             trainable_fc=True)
+    model = VGG19_CatDog(num_class=n_class,
+                         num_channels=3,
+                         learning_rate=FLAGS.lr,
+                         is_load=True,
+                         pre_train_path=VGG_PATH,
+                         is_rescale=False,
+                         im_height=224, im_width=224,
+                         trainable_conv_12=False,
+                         trainable_conv_3up=False,
+                         trainable_fc=True,
+                         drop_out=FLAGS.dropout)
 
     inference_list_validation = InferScalars(['accuracy/result', 'loss/result', 'loss/cross_entropy'],
                                              ['test_accuracy', 'test_loss', 'test_entropy'])
@@ -57,47 +76,47 @@ def config_train(FLAGS):
         CheckScalar(['accuracy/result', 'loss/result'], periodic=10)]
 
     return TrainConfig(
-        dataflow=train_data, model=vgg_net,
+        dataflow=train_data, model=model,
         callbacks=training_callbacks,
         batch_size=32, max_epoch=25,
         monitors=TFSummaryWriter(),
         summary_periodic=10,
         is_load=False,
-        model_name='gap_1024_1024/model-5700',
+        model_name='bk6/model-5700',
         default_dirs=config_path)
 
 
-def config_predict():
-    # test_data = ImageLabelFromCSVFile('.jpg', data_dir=DATA_DIR, start_line=1,
-    #                                   label_file_name='../labels.csv',
-    #                                   num_channel=3, resize=224)
-    test_data = new_ImageFromFile('.jpg', data_dir=TEST_DIR, 
-                              num_channel=3,
-                              shuffle=False,
-                              resize=224)
+# def config_predict():
+#     # test_data = ImageLabelFromCSVFile('.jpg', data_dir=DATA_DIR, start_line=1,
+#     #                                   label_file_name='../labels.csv',
+#     #                                   num_channel=3, resize=224)
+#     test_data = new_ImageFromFile('.jpg', data_dir=TEST_DIR, 
+#                               num_channel=3,
+#                               shuffle=False,
+#                               resize=224)
 
-    pridection_list = [
-    # PredictionMeanScalar(prediction_scalar_tensors='accuracy/result', 
-    #                                         print_prefix='test_accuracy'),
-                    # PredictionScalar('pre_prob', 'out'),
-                    PredictionMat('class_prob','class_prob')]
+#     pridection_list = [
+#     # PredictionMeanScalar(prediction_scalar_tensors='accuracy/result', 
+#     #                                         print_prefix='test_accuracy'),
+#                     # PredictionScalar('pre_prob', 'out'),
+#                     PredictionMat('class_prob','class_prob')]
 
-    n_class = 120
-    vgg_net = VGG19_Finetune(num_class=n_class,
-                             num_channels=3,
-                             is_load=False,
-                             is_rescale=False,
-                             im_height=224, im_width=224,
-                             trainable_conv_12=False,
-                             trainable_conv_3up=False,
-                             trainable_fc=False)
+#     n_class = 120
+#     vgg_net = VGG19_Finetune(num_class=n_class,
+#                              num_channels=3,
+#                              is_load=False,
+#                              is_rescale=False,
+#                              im_height=224, im_width=224,
+#                              trainable_conv_12=False,
+#                              trainable_conv_3up=False,
+#                              trainable_fc=False)
 
-    return PridectConfig(
-                 dataflow=test_data, model=vgg_net,
-                 model_dir=SAVE_DIR, model_name='bk2/model-3300',
-                 predictions=pridection_list,
-                 batch_size=128,
-                 default_dirs=config_path)
+#     return PridectConfig(
+#                  dataflow=test_data, model=vgg_net,
+#                  model_dir=SAVE_DIR, model_name='bk2/model-3300',
+#                  predictions=pridection_list,
+#                  batch_size=128,
+#                  default_dirs=config_path)
 
 
 def get_args():
@@ -110,6 +129,8 @@ def get_args():
 
     parser.add_argument('--lr', default=1e-6, type=float,
                         help='learning rate of fine tuning')
+    parser.add_argument('--dropout', default=0.5, type=float,
+                        help='drop out keep probability')
 
     return parser.parse_args()
 
@@ -119,9 +140,9 @@ if __name__ == '__main__':
     if FLAGS.train:
         config = config_train(FLAGS)
         SimpleFeedTrainer(config).train()
-    if FLAGS.predict:
-        config = config_predict()
-        SimpleFeedPredictor(config).run_predict()
+    # if FLAGS.predict:
+    #     config = config_predict()
+    #     SimpleFeedPredictor(config).run_predict()
 
 # if __name__ == '__main__':
 #     keep_prob = tf.placeholder(tf.float32, name='keep_prob')
