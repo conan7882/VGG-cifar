@@ -34,9 +34,6 @@ def get_args():
                         help='Path to put test image data')
     
     return parser.parse_args()
-def test():
-    label_dict = loader.load_label_dict()
-    print(label_dict[0])
 
 def test_pre_trained():
     FLAGS = get_args()
@@ -65,5 +62,5 @@ def test_pre_trained():
 
 if __name__ == "__main__":
     test_pre_trained()
-    # test()
+
 
