@@ -28,7 +28,7 @@ def get_args():
                         help='Path of pretrain VGG19 model')
     # parser.add_argument('--n_channel', type=int, default=3,
     #                     help='Number of channels of input images')
-    parser.add_argument('--im_image', type=str, default='.png',
+    parser.add_argument('--im_image', type=str, default='.jpg',
                         help='Part of image image name')
     parser.add_argument('--data_path', type=str, default=DATA_PATH,
                         help='Path to put test image data')

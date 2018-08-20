@@ -111,7 +111,7 @@ class BaseVGG(BaseModel):
 class VGG19(BaseVGG):
    def _conv_layers(self, inputs):
         conv_out = module.vgg19_conv(
-            layer_dict=self.layers, inputs=inputs, keep_prob=self.keep_prob,
+            layer_dict=self.layers, inputs=inputs, keep_prob=1.,
             pretrained_dict=self._pretrained_dict,
             bn=self._bn, init_w=INIT_W, trainable=self._trainable,
             is_training=self.is_training, wd=self._wd)
@@ -120,7 +120,7 @@ class VGG19(BaseVGG):
 class VGG16(BaseVGG):
    def _conv_layers(self, inputs):
         conv_out = module.vgg16_conv(
-            layer_dict=self.layers, inputs=inputs, keep_prob=self.keep_prob,
+            layer_dict=self.layers, inputs=inputs, keep_prob=1.,
             pretrained_dict=self._pretrained_dict,
             bn=self._bn, init_w=INIT_W, trainable=self._trainable,
             is_training=self.is_training, wd=self._wd)
