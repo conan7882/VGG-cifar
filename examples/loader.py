@@ -14,7 +14,7 @@ from src.dataflow.cifar import CIFAR
 
 def load_label_dict():
     label_dict = {}
-    with open('../imageNetLabel.txt', 'r') as f:
+    with open('../data/imageNetLabel.txt', 'r') as f:
         for idx, line in enumerate(f):
             names = line.rstrip()[10:]
             label_dict[idx] = names
