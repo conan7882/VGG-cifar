@@ -6,13 +6,9 @@
  
 ## Requirements
 - Python 3.3+
-- [Tensorflow 1.0+](https://www.tensorflow.org/)
-- [TensorCV](https://github.com/conan7882/DeepVision-tensorflow)
-
-<!--## TODO
-
-- [x] Test pre-trained model
-- [ ] Fine tuning-->
+- [Tensorflow 1.9+](https://www.tensorflow.org/)
+- [Numpy](http://www.numpy.org/)
+- [Scipy](https://www.scipy.org/)
 
 
 ## Implementation Details
@@ -20,10 +16,9 @@
 For testing the pre-trained model
 
 - The last three fully connected layers are converted to convolutional layers making it a fully convolutional network. Then the input images can be arbitrary size.
-
-- Images are rescaled so that the smallest side equals 224 before fed into the model.
-
 - [Global average pooling](https://arxiv.org/abs/1312.4400) is used to get fix size of class scores for all the test images.
+- Images are rescaled so that the smallest side equals 224 before fed into the model to reduce the computational complexity as well as keep the high classification performance, since for too large scale image, responses of relevant parts maybe averaged by responces of non-relevant of the image through global average pooling.  
+
 
 ## Results
 
