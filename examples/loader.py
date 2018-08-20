@@ -5,6 +5,7 @@
 
 import sys
 import numpy as np
+import tensorflow as tf
 import skimage.transform
 
 sys.path.append('../')
@@ -48,12 +49,42 @@ def read_image(im_name, n_channel, data_dir='', batch_size=1):
 def load_cifar(cifar_path, batch_size=64, substract_mean=True):
     # cifar_path = 'E:/Dataset/cifar/'
     # im_pair = [im[:,:,::-1,:] for im in im_pair]
-    def preprocess(im):
-        if np.random.random() > 0.5:
-            im = im[:,::-1,:]
-        # if np.random.random() > 0.5:
-        #     im = im[::-1,:,:] 
-        return im
+    # def preprocess(im):
+    #     # if np.random.random() > 0.5:
+    #     #     im = im[:,::-1,:]
+    #     # if np.random.random() > 0.5:
+    #     #     im = im[::-1,:,:] 
+    #     pf = tf.keras.preprocessing.image.ImageDataGenerator(
+    #         featurewise_center=False,
+    #         samplewise_center=False,
+    #         featurewise_std_normalization=False,
+    #         samplewise_std_normalization=False,
+    #         zca_whitening=False,
+    #         zca_epsilon=1e-06,
+    #         rotation_range=20.0,
+    #         width_shift_range=0.1,
+    #         height_shift_range=0.1,
+    #         brightness_range=None,
+    #         shear_range=0.0,
+    #         zoom_range=0.0,
+    #         channel_shift_range=0.0,
+    #         fill_mode='nearest',
+    #         cval=0.0,
+    #         horizontal_flip=True,
+    #         vertical_flip=False,
+    #         rescale=None,
+    #         preprocessing_function=None,
+    #         data_format=None,
+    #         validation_split=0.0)
+
+    #     im = np.expand_dims(im, axis=0)
+    #     pf.fit(im)
+    #     im = pf.flow(im, batch_size=1)[0].astype('int8')
+
+    #     return np.squeeze(im, axis=0)
+
+    # def pf_test(im):
+    #     return im.astype('int8')
 
     train_data = CIFAR(
         data_dir=cifar_path,
@@ -62,7 +93,9 @@ def load_cifar(cifar_path, batch_size=64, substract_mean=True):
         data_type='train',
         channel_mean=None,
         substract_mean=substract_mean,
-        pf=preprocess)
+        augment=True,
+        # pf=preprocess,
+        )
     train_data.setup(epoch_val=0, batch_size=batch_size)
 
     valid_data = CIFAR(
@@ -71,19 +104,35 @@ def load_cifar(cifar_path, batch_size=64, substract_mean=True):
         batch_dict_name=['image', 'label'],
         data_type='valid',
         channel_mean=train_data.channel_mean,
-        substract_mean=substract_mean)
+        substract_mean=substract_mean,
+        augment=False,
+        # pf=pf_test,
+        )
     valid_data.setup(epoch_val=0, batch_size=batch_size)
 
     return train_data, valid_data
 
 if __name__ == "__main__":
-    import numpy as np
     import matplotlib.pyplot as plt
 
     # image_data = read_image(im_name='.png', n_channel=3, data_dir='../fig/')
-    image_data, _ = load_cifar('E:/Dataset/cifar/')
+    image_data, test_data = load_cifar('E:/Dataset/cifar/', batch_size=100, substract_mean=True)
+    batch_data = image_data.next_batch_dict()
+    print(batch_data['image'].shape)
+    plt.figure()
+    plt.imshow(np.squeeze(batch_data['image'][0]))
+    print(type(batch_data['image'][0]))
+
+    plt.figure()
+    plt.imshow(np.squeeze(batch_data['image'][1]))
+
+
     batch_data = image_data.next_batch_dict()
     plt.figure()
     plt.imshow(np.squeeze(batch_data['image'][0]))
+    print(type(batch_data['image'][0]))
+    plt.figure()
+    plt.imshow(np.squeeze(batch_data['image'][1]))
+
     plt.show()
     

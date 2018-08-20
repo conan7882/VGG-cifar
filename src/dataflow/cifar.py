@@ -5,7 +5,8 @@
 
 import os
 import pickle
-import numpy as np 
+import numpy as np
+import tensorflow as tf
 
 from src.dataflow.base import DataFlow
 
@@ -18,10 +19,36 @@ class CIFAR(DataFlow):
                  data_type='train',
                  channel_mean=None,
                  substract_mean=True,
-                 pf=None):
+                 pf=None,
+                 augment=False):
         self._mean = channel_mean
         self._substract = substract_mean
         self._pf = pf
+
+        self._augment = augment
+        if augment:
+            self._augment_flow = tf.keras.preprocessing.image.ImageDataGenerator(
+                featurewise_center=False,
+                samplewise_center=False,
+                featurewise_std_normalization=False,
+                samplewise_std_normalization=False,
+                zca_whitening=False,
+                zca_epsilon=1e-06,
+                rotation_range=20.0,
+                width_shift_range=0.1,
+                height_shift_range=0.1,
+                brightness_range=None,
+                shear_range=0.0,
+                zoom_range=0.0,
+                channel_shift_range=0.0,
+                fill_mode='nearest',
+                cval=0.0,
+                horizontal_flip=True,
+                vertical_flip=False,
+                rescale=None,
+                preprocessing_function=None,
+                data_format=None,
+                validation_split=0.0)
         # self.num_channels = 3
         # self.im_size = [32, 32]
 
@@ -88,14 +115,14 @@ class CIFAR(DataFlow):
             self._mean = self._comp_channel_mean()
         return self._mean
 
-    def substract_mean(self, im_list):
+    def substract_channel_mean(self, im_list):
         """
         Args:
             im_list: [batch, h, w, c]
         """
         mean = self.channel_mean
         for c_id in range(0, im_list.shape[-1]):
-            im_list[:,:, c_id] = im_list[:,:, c_id] - mean[c_id]
+            im_list[:, :, :, c_id] = im_list[:, :, :, c_id] - mean[c_id]
         return im_list
 
     def _comp_channel_mean(self):
@@ -137,9 +164,14 @@ class CIFAR(DataFlow):
             self._image_id = 0
             if self.shuffle:
                 self._suffle_files()
-        if self._substract:
-            batch_image = self.substract_mean(batch_image)
-        return batch_image, batch_label
+        if self._augment:
+            self._augment_flow.fit(batch_image)
+            batch_image, batch_label = self._augment_flow.flow(batch_image, batch_label, batch_size=self._batch_size)[0]
+        # if self._substract:
+        #     batch_image = self.substract_channel_mean(batch_image)
+        # batch_image = batch_image.astype('float32')
+        batch_image = batch_image / 255. * 2. - 1.
+        return batch_image.astype('float32'), batch_label
 
     def next_batch_dict(self):
         re_dict = {}
