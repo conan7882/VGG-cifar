@@ -35,8 +35,10 @@ For training from scratch on CIFAR-10
 Download the pre-trained parameters VGG19 NPY [here](https://www.dropbox.com/sh/dad57t3hl60jeb0/AADlcUshCnmN2bAZdgdkmxDna?dl=0). This is original downloaded from [here](https://github.com/machrisaa/tensorflow-vgg#tensorflow-vgg16-and-vgg19).
 - Setup path
 In [`examples/vgg_pretrained.py`](examples/vgg_pretrained.py):
-- `VGG_PATH` is the path for pre-trained vgg model.
-- `DATA_PATH` is the path to put testing images.
+
+ `VGG_PATH` is the path for pre-trained vgg model.
+ `DATA_PATH` is the path to put testing images.
+
 - Run
 Go to `examples/` and put test image in folder `DATA_PATH`, then run the script:
 
@@ -48,23 +50,26 @@ python vgg_pretrained.py --im_name PART-OF-IMAGE-NAME
 
 The output will be the top-5 class labels and probabilities.
 
-## Train the network on CIFAR-10
-### Download dataset
+### Train the network on CIFAR-10
+- Download dataset
 Download CIFAR-10 dataset from [here](https://www.cs.toronto.edu/~kriz/cifar.html)
-### Setup path
+- Setup path
 In [`examples/vgg_cifar.py`](examples/vgg_cifar.py):
-- `DATA_PATH` is the path to put CIFAR-10.
-- `SAVE_PATH` is the path to save or load summary file and trained model.
-### Train the model
-- Go to `examples/` and run the script:
+
+ `DATA_PATH` is the path to put CIFAR-10.
+ `SAVE_PATH` is the path to save or load summary file and trained model.
+
+- Train the model
+Go to `examples/` and run the script:
 
 ```
 python vgg_cifar.py --train --lr LEARNING-RATE --bsize BATCH-SIZE --keep_prob KEEP-PROB-OF-DROPOUT
 --maxepoch MAX-TRAINING-EPOCH
 ```
 Summary and model will be saved in `SAVE_PATH`. You can download one pre-trained model on CIFAR-10 [here](https://www.dropbox.com/sh/pka0tur7yz2cdpk/AADM0rJNiB3pkf4tXYtMwsGKa?dl=0).
-### Evaluate the model
-- Go to `examples/` and put the pre-trained model in `SAVE_PATH`. Then run the script:
+
+- Evaluate the model
+Go to `examples/` and put the pre-trained model in `SAVE_PATH`. Then run the script:
 
 ```
 python vgg_cifar.py --eval --load PRE-TRAINED-MODEL-ID
