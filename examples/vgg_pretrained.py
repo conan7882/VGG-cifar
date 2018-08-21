@@ -14,8 +14,6 @@ sys.path.append('../')
 import loader as loader
 from src.nets.vgg import VGG19
 
-# VGG_PATH = '/Users/gq/workspace/Dataset/pretrained/vgg19.npy'
-VGG_PATH = 'E:/GITHUB/workspace/CNN/pretrained/vgg19.npy'
 VGG_PATH = '/home/qge2/workspace/data/pretrain/vgg/vgg19.npy'
 DATA_PATH = '../data/'
 IM_CHANNEL = 3
@@ -26,8 +24,6 @@ def get_args():
 
     parser.add_argument('--vgg_path', type=str, default=VGG_PATH,
                         help='Path of pretrain VGG19 model')
-    # parser.add_argument('--n_channel', type=int, default=3,
-    #                     help='Number of channels of input images')
     parser.add_argument('--im_image', type=str, default='.jpg',
                         help='Part of image image name')
     parser.add_argument('--data_path', type=str, default=DATA_PATH,

@@ -14,17 +14,21 @@ sys.path.append('../')
 import loader as loader
 from src.nets.vgg import VGG_CIFAR10
 from src.helper.trainer import Trainer
+from src.helper.evaluator import Evaluator
 
 
-# VGG_PATH = '/Users/gq/workspace/Dataset/pretrained/vgg19.npy'
-# VGG_PATH = 'E:/GITHUB/workspace/CNN/pretrained/vgg19.npy'
-# VGG_PATH = '/home/qge2/workspace/data/pretrain/vgg/vgg16.npy'
 DATA_PATH = '/home/qge2/workspace/data/dataset/cifar/'
-SAVE_PATH = '/home/qge2/workspace/data/out/vgg/cifar/'
-# IM_CHANNEL = 3
+SAVE_PATH = '/home/qge2/workspace/data/out/vgg/cifar/final/submean/'
 
 def get_args():
     parser = argparse.ArgumentParser()
+
+    parser.add_argument('--train', action='store_true',
+                        help='Train the model')
+    parser.add_argument('--eval', action='store_true',
+                        help='Evaluate the model')
+    parser.add_argument('--load', type=int, default=104,
+                        help='Epoch id of pre-trained model')
 
     parser.add_argument('--lr', type=float, default=1e-3,
                         help='Initial learning rate')
@@ -35,15 +39,6 @@ def get_args():
     parser.add_argument('--maxepoch', type=int, default=150,
                         help='Max number of epochs for training')
 
-    # parser.add_argument('--vgg_path', type=str, default=VGG_PATH,
-    #                     help='Path of pretrain VGG19 model')
-    # parser.add_argument('--n_channel', type=int, default=3,
-    #                     help='Number of channels of input images')
-    # parser.add_argument('--im_image', type=str, default='.png',
-    #                     help='Part of image image name')
-    # parser.add_argument('--data_path', type=str, default=DATA_PATH,
-    #                     help='Path to put test image data')
-    
     return parser.parse_args()
 
 def train():
@@ -64,11 +59,39 @@ def train():
 
     with tf.Session() as sess:
         writer = tf.summary.FileWriter(SAVE_PATH)
+        saver = tf.train.Saver()
         sess.run(tf.global_variables_initializer())
         writer.add_graph(sess.graph)
-        for i in range(FLAGS.maxepoch):
+        for epoch_id in range(FLAGS.maxepoch):
             trainer.train_epoch(sess, keep_prob=FLAGS.keep_prob, summary_writer=writer)
             trainer.valid_epoch(sess, dataflow=valid_data, summary_writer=writer)
+            saver.save(sess, '{}vgg-cifar-epoch-{}'.format(SAVE_PATH, epoch_id))
+        saver.save(sess, '{}vgg-cifar-epoch-{}'.format(SAVE_PATH, epoch_id))
+
+def evaluate():
+    FLAGS = get_args()
+    train_data, valid_data = loader.load_cifar(
+        cifar_path=DATA_PATH, batch_size=FLAGS.bsize, substract_mean=True)
+
+    valid_model = VGG_CIFAR10(
+        n_channel=3, n_class=10, bn=True, sub_vgg_mean=False)
+    valid_model.create_test_model()
+
+    evaluator = Evaluator(valid_model)
+
+    with tf.Session() as sess:
+        saver = tf.train.Saver()
+        sess.run(tf.global_variables_initializer())
+        saver.restore(sess, '{}vgg-cifar-epoch-{}'.format(SAVE_PATH, FLAGS.load))
+        print('training set:', end='')
+        evaluator.accuracy(sess, train_data)
+        print('testing set:', end='')
+        evaluator.accuracy(sess, valid_data)
 
 if __name__ == "__main__":
-    train()
+    FLAGS = get_args()
+
+    if FLAGS.train:
+        train()
+    if FLAGS.eval:
+        evaluate()
