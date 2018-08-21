@@ -31,12 +31,7 @@ For training from scratch on CIFAR-10
 
 ## ImageNet Classification
 ### Download pre-trained VGG19 model
-<<<<<<< HEAD
 Download the pre-trained parameters VGG19 NPY [here](https://www.dropbox.com/sh/dad57t3hl60jeb0/AADlcUshCnmN2bAZdgdkmxDna?dl=0). This is original downloaded from [here](https://github.com/machrisaa/tensorflow-vgg#tensorflow-vgg16-and-vgg19).
-### Config path
-All directories are setup in [`config.py`](config.py).
-=======
-Download the pre-trained parameters VGG19 NPY [here](https://github.com/machrisaa/tensorflow-vgg#tensorflow-vgg16-and-vgg19).
 ### Setup path
 In [`examples/vgg_pretrained.py`](examples/vgg_pretrained.py):
 - `VGG_PATH` is the path for pre-trained vgg model.
@@ -48,7 +43,7 @@ In [`examples/vgg_pretrained.py`](examples/vgg_pretrained.py):
 python vgg_pretrained.py --im_name PART-OF-IMAGE-NAME
 ```
 `--im_name` is the option for image names you want to test. If the testing images are all `png` files, this can be `png`. The default setting is `.jpg`.
->>>>>>> clean
+
 
 The output will be the top-5 class labels and probabilities.
 
