@@ -37,7 +37,7 @@ In [`examples/vgg_pretrained.py`](examples/vgg_pretrained.py):
 - `VGG_PATH` is the path for pre-trained vgg model.
 - `DATA_PATH` is the path to put testing images.
 ### Run
-- Go to `examples/` and put test image in folder `DATA_PATH`, then run the script:
+Go to `examples/` and put test image in folder `DATA_PATH`, then run the script:
 
 ```
 python vgg_pretrained.py --im_name PART-OF-IMAGE-NAME
