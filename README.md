@@ -26,19 +26,17 @@ For training from scratch on CIFAR-10
 - Since CIFAR-10 contains smaller number of training set and classes than ImageNet, two fully connected layers consist of 1024 units are used before the output linear layer.
 - [Batch normalization](https://arxiv.org/abs/1502.03167) for all of the layers except the output layer. All the activation functions are ReLUs.
 - During training, dropout with keep probability 0.4 is applied to two fully connected layers. I have tried to add dropout after each max pooling layers, but it harms the performance both for training and testing set. Weight decay with 5e-4 is used as well.
-- The network is trained through Adam optimizer. The initial learning rate is 1e-3, decays to 1e-4 after 50 epochs, and finally decays to 1e-5 after 70 epochs. 
+- The network is trained through Adam optimizer. Batch size is 128. The initial learning rate is 1e-3, decays to 1e-4 after 50 epochs, and finally decays to 1e-5 after 70 epochs. 
 - Each color channel of the input images are substracted by the mean value computed from the training set.
 
-## Usage
+## ImageNet Classification
 ### Download pre-trained VGG19 model
 Download the pre-trained parameters VGG19 NPY [here](https://github.com/machrisaa/tensorflow-vgg#tensorflow-vgg16-and-vgg19).
 ### Config path
 In [`examples/vgg_pretrained.py`](examples/vgg_pretrained.py):
 - `VGG_PATH` is the path for pre-trained vgg model.
 - `DATA_PATH` is the path to put testing images.
-
-
-### ImageNet Classification
+### Run
 - Go to `examples/` and put test image in folder `DATA_PATH`, then run the script:
 
 ```
@@ -47,6 +45,29 @@ python vgg_pretrained.py --im_name PART-OF-IMAGE-NAME
 `--im_name` is the option for image names you want to test. If the testing images are all `png` files, this can be `png`. The default setting is `.jpg`.
 
 The output will be the top-5 class labels and probabilities.
+
+## Train the network on CIFAR-10
+### Download dataset
+Download CIFAR-10 dataset from [here](https://www.cs.toronto.edu/~kriz/cifar.html)
+### Config path
+In [`examples/vgg_cifar.py`](examples/vgg_cifar.py):
+- `DATA_PATH` is the path to put CIFAR-10.
+- `SAVE_PATH` is the path to save or load summary file and trained model.
+### Train the model
+- Go to `examples/` and run the script:
+
+```
+python vgg_cifar.py --train --lr LEARNING-RATE --bsize BATCH-SIZE --keep_prob KEEP-PROB-OF-DROPOUT
+--maxepoch MAX-TRAINING-EPOCH
+```
+Summary and model will be saved in `SAVE_PATH`. You can download one pre-trained model on CIFAR-10 [here](https://www.dropbox.com/sh/pka0tur7yz2cdpk/AADM0rJNiB3pkf4tXYtMwsGKa?dl=0).
+### Evaluate the model
+- Go to `examples/` and put the pre-trained model in `SAVE_PATH`. Then run the script:
+
+```
+python vgg_cifar.py --eval --load PRE-TRAINED-MODEL-ID
+```
+The pre-trained ID is epoch ID shown in the save modeled file name. The default value is `104`, which indicates the one I uploaded. The output will be the accuarcy of training and testing set.
 
 ## Results
 ### Image classification using pre-trained VGG19 model
@@ -68,7 +89,7 @@ learning curve for training set
 ![train_lc](fig/train_lc.png)
 
 learning curve for testing set 
-- The accuracy on testing set is 91.81% around 100 epoch. We can observe the slightly overfitting behavior at the end of training.
+- The accuracy on testing set is 91.81% around 100 epochs. We can observe the slightly overfitting behavior at the end of training.
 
 ![valid_lc](fig/valid_lc.png)
 
