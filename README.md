@@ -29,14 +29,15 @@ For training from scratch on CIFAR-10
 - The network is trained through Adam optimizer. Batch size is 128. The initial learning rate is 1e-3, decays to 1e-4 after 50 epochs, and finally decays to 1e-5 after 70 epochs. 
 - Each color channel of the input images are subtracted by the mean value computed from the training set.
 
-## ImageNet Classification
-### Download pre-trained VGG19 model
+## Usage
+### ImageNet Classification
+- Download pre-trained VGG19 model
 Download the pre-trained parameters VGG19 NPY [here](https://www.dropbox.com/sh/dad57t3hl60jeb0/AADlcUshCnmN2bAZdgdkmxDna?dl=0). This is original downloaded from [here](https://github.com/machrisaa/tensorflow-vgg#tensorflow-vgg16-and-vgg19).
-### Setup path
+- Setup path
 In [`examples/vgg_pretrained.py`](examples/vgg_pretrained.py):
 - `VGG_PATH` is the path for pre-trained vgg model.
 - `DATA_PATH` is the path to put testing images.
-### Run
+- Run
 Go to `examples/` and put test image in folder `DATA_PATH`, then run the script:
 
 ```
