@@ -36,7 +36,7 @@ def get_args():
                         help='Batch size')
     parser.add_argument('--keep_prob', type=float, default=0.5,
                         help='Keep probability for dropout')
-    parser.add_argument('--maxepoch', type=int, default=150,
+    parser.add_argument('--maxepoch', type=int, default=100,
                         help='Max number of epochs for training')
 
     return parser.parse_args()

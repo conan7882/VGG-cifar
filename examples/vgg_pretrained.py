@@ -24,7 +24,7 @@ def get_args():
 
     parser.add_argument('--vgg_path', type=str, default=VGG_PATH,
                         help='Path of pretrain VGG19 model')
-    parser.add_argument('--im_image', type=str, default='.jpg',
+    parser.add_argument('--im_name', type=str, default='.jpg',
                         help='Part of image image name')
     parser.add_argument('--data_path', type=str, default=DATA_PATH,
                         help='Path to put test image data')
@@ -35,7 +35,7 @@ def test_pre_trained():
     FLAGS = get_args()
     label_dict = loader.load_label_dict()
     image_data = loader.read_image(
-        im_name=FLAGS.im_image, n_channel=IM_CHANNEL,
+        im_name=FLAGS.im_name, n_channel=IM_CHANNEL,
         data_dir=FLAGS.data_path, batch_size=1)
 
     test_model = VGG19(
