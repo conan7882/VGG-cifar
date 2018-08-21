@@ -1,0 +1,70 @@
+===============================
+[image]: ../data/000000000285.jpg
+<br>1: probability: 1.00, label: brown bear, bruin, Ursus arctos
+<br>2: probability: 0.00, label: American black bear, black bear, Ursus americanus, Euarctos americanus
+<br>3: probability: 0.00, label: ice bear, polar bear, Ursus Maritimus, Thalarctos maritimus
+<br>4: probability: 0.00, label: sloth bear, Melursus ursinus, Ursus ursinus
+<br>5: probability: 0.00, label: chow, chow chow
+===============================
+[image]: ../data/000000000724.jpg
+<br>1: probability: 0.61, label: street sign
+<br>2: probability: 0.27, label: traffic light, traffic signal, stoplight
+<br>3: probability: 0.02, label: mailbox, letter box
+<br>4: probability: 0.02, label: parking meter
+<br>5: probability: 0.01, label: pay-phone, pay-station
+===============================
+[image]: ../data/000000001584.jpg
+<br>1: probability: 0.48, label: passenger car, coach, carriage
+<br>2: probability: 0.36, label: trolleybus, trolley coach, trackless trolley
+<br>3: probability: 0.10, label: minibus
+<br>4: probability: 0.02, label: school bus
+<br>5: probability: 0.01, label: streetcar, tram, tramcar, trolley, trolley car
+===============================
+[image]: ../data/000000003845.jpg
+<br>1: probability: 0.17, label: burrito
+<br>2: probability: 0.13, label: plate
+<br>3: probability: 0.10, label: Dungeness crab, Cancer magister
+<br>4: probability: 0.06, label: mashed potato
+<br>5: probability: 0.06, label: guacamole
+===============================
+[image]: ../data/000000032081.jpg
+<br>1: probability: 0.99, label: racket, racquet
+<br>2: probability: 0.01, label: tennis ball
+<br>3: probability: 0.00, label: volleyball
+<br>4: probability: 0.00, label: ballplayer, baseball player
+<br>5: probability: 0.00, label: Walker hound, Walker foxhound
+===============================
+[image]: ../data/ILSVRC2017_test_00000004.jpg
+<br>1: probability: 1.00, label: goldfish, Carassius auratus
+<br>2: probability: 0.00, label: rock beauty, Holocanthus tricolor
+<br>3: probability: 0.00, label: anemone fish
+<br>4: probability: 0.00, label: coral reef
+<br>5: probability: 0.00, label: puffer, pufferfish, blowfish, globefish
+===============================
+[image]: ../data/ILSVRC2017_test_00000005.jpg
+<br>1: probability: 0.72, label: garbage truck, dustcart
+<br>2: probability: 0.12, label: trailer truck, tractor trailer, trucking rig, rig, articulated lorry, semi
+<br>3: probability: 0.12, label: snowplow, snowplough
+<br>4: probability: 0.01, label: harvester, reaper
+<br>5: probability: 0.01, label: tow truck, tow car, wrecker
+===============================
+[image]: ../data/ILSVRC2017_test_00000014.jpg
+<br>1: probability: 1.00, label: lesser panda, red panda, panda, bear cat, cat bear, Ailurus fulgens
+<br>2: probability: 0.00, label: red fox, Vulpes vulpes
+<br>3: probability: 0.00, label: polecat, fitch, foulmart, foumart, Mustela putorius
+<br>4: probability: 0.00, label: weasel
+<br>5: probability: 0.00, label: kit fox, Vulpes macrotis
+===============================
+[image]: ../data/IMG_4379.jpg
+<br>1: probability: 0.33, label: tabby, tabby cat
+<br>2: probability: 0.20, label: Egyptian cat
+<br>3: probability: 0.11, label: tiger cat
+<br>4: probability: 0.03, label: Cardigan, Cardigan Welsh corgi
+<br>5: probability: 0.02, label: bookcase
+===============================
+[image]: ../data/IMG_7940.jpg
+<br>1: probability: 1.00, label: streetcar, tram, tramcar, trolley, trolley car
+<br>2: probability: 0.00, label: trolleybus, trolley coach, trackless trolley
+<br>3: probability: 0.00, label: passenger car, coach, carriage
+<br>4: probability: 0.00, label: electric locomotive
+<br>5: probability: 0.00, label: minibus

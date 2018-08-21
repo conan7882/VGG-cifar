@@ -55,6 +55,9 @@ class DataFlow(object):
         self.rng = get_rng(self)
         self._setup()
 
+    def reset_epoch(self):
+        self._epochs_completed = 0
+
     def _setup(self):
         pass
 
@@ -116,3 +119,7 @@ class DataFlow(object):
 
     def get_batch_file_name(self):
         return self._cur_file_name
+
+    @property
+    def epochs_completed(self):
+        return self._epochs_completed
