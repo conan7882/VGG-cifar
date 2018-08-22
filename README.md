@@ -68,7 +68,7 @@ python vgg_cifar.py --eval --load PRE-TRAINED-MODEL-ID
 
 ## Results
 ### Image classification using pre-trained VGG19 model
-Top five prediction (VGG19) are shown. The probabilities are shown keep two decimal places. Note that the pre-trained model are trained on [ImageNet](http://www.image-net.org/).
+- Top five predictions (VGG19) are shown. The probabilities are shown keeping two decimal places. Note that the pre-trained model are trained on [ImageNet](http://www.image-net.org/).
 
 *Data Source* | *Image* | *Result* |
 |:--|:--:|:--|
