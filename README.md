@@ -1,6 +1,6 @@
 # VGG19-FCN for Image Classification
  - TensorFlow implementation of [Very Deep Convolutional Networks for Large-Scale Image Recognition](https://arxiv.org/abs/1409.1556). 
- - This repository contains the examples of natural image classification using pre-trained model as well as training a VGG19-like network from scratch on [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset (91.81% accuracy on testing set).
+ - This repository contains the examples of natural image classification using pre-trained model as well as training a VGG19-like network from scratch on [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset (91.81% accuracy on testing set). The pre-trained model on CIFAR-10 can be download from [here](https://www.dropbox.com/sh/pka0tur7yz2cdpk/AADM0rJNiB3pkf4tXYtMwsGKa?dl=0).
 
  
 ## Requirements
@@ -55,7 +55,7 @@ Go to `examples/` and run the script:
 python vgg_cifar.py --train --lr LEARNING-RATE --bsize BATCH-SIZE --keep_prob KEEP-PROB-OF-DROPOUT
 --maxepoch MAX-TRAINING-EPOCH
 ```
-- Summary and model will be saved in `SAVE_PATH`. You can download one pre-trained model on CIFAR-10 [here](https://www.dropbox.com/sh/pka0tur7yz2cdpk/AADM0rJNiB3pkf4tXYtMwsGKa?dl=0).
+- Summary and model will be saved in `SAVE_PATH`. One pre-trained model on CIFAR-10  can be downloaded from [here](https://www.dropbox.com/sh/pka0tur7yz2cdpk/AADM0rJNiB3pkf4tXYtMwsGKa?dl=0).
 
 #### Evaluate the model
 Go to `examples/` and put the pre-trained model in `SAVE_PATH`. Then run the script:
