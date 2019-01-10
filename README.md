@@ -52,8 +52,11 @@ python vgg_pretrained.py --im_name PART-OF-IMAGE-NAME
 Go to `examples/` and run the script:
 
 ```
-python vgg_cifar.py --train --lr LEARNING-RATE --bsize BATCH-SIZE --keep_prob KEEP-PROB-OF-DROPOUT
---maxepoch MAX-TRAINING-EPOCH
+python vgg_cifar.py --train \
+  --lr LEARNING_RATE \
+  --bsize BATCH_SIZE \
+  --keep_prob KEEP_PROB_OF_DROPOUT \
+  --maxepoch MAX_TRAINING_EPOCH
 ```
 - Summary and model will be saved in `SAVE_PATH`. One pre-trained model on CIFAR-10  can be downloaded from [here](https://www.dropbox.com/sh/pka0tur7yz2cdpk/AADM0rJNiB3pkf4tXYtMwsGKa?dl=0).
 
@@ -61,7 +64,8 @@ python vgg_cifar.py --train --lr LEARNING-RATE --bsize BATCH-SIZE --keep_prob KE
 Go to `examples/` and put the pre-trained model in `SAVE_PATH`. Then run the script:
 
 ```
-python vgg_cifar.py --eval --load PRE-TRAINED-MODEL-ID
+python vgg_cifar.py --eval \
+  --load PRE_TRAINED_MODEL_ID
 ```
 - The pre-trained ID is epoch ID shown in the save modeled file name. The default value is `104`, which indicates the one I uploaded. 
 - The output will be the accuracy of training and testing set.
