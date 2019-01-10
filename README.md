@@ -39,7 +39,7 @@ For training from scratch on CIFAR-10
 Go to `examples/` and put test image in folder `DATA_PATH`, then run the script:
 
 ```
-python vgg_pretrained.py --im_name PART-OF-IMAGE-NAME
+python vgg_pretrained.py --im_name PART_OF_IMAGE_NAME
 ```
 - `--im_name` is the option for image names you want to test. If the testing images are all `png` files, this can be `png`. The default setting is `.jpg`.
 - The output will be the top-5 class labels and probabilities.
